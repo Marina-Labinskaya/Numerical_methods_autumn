@@ -195,11 +195,6 @@ solution_characteristics seidel_method(const std::vector<std::vector<double>>& V
 	solution_characteristics res;
 	res.V = V;
 	res.eps_n = 1.0;
-	/*for (size_t i = 1; i < res.V[0].size() - 1; i++)
-		for (size_t j = 1; j < res.V[0].size() - 1; j++) {
-			if (abs(res.V[i][j]) >= res.eps_n)
-				res.eps_n = abs(res.V[i][j]);
-		}*/
 
 	int N = (res.V[0].size() - 2) * (res.V[0].size() - 2);
 	double h = (b - a) / (res.V[0].size() - 1);
@@ -215,21 +210,16 @@ solution_characteristics seidel_method(const std::vector<std::vector<double>>& V
 		F[i * (res.V[0].size() - 2) + (res.V[0].size() - 3)] -= f2(c + (i + 1) * k) / (h * h);
 	}
 
-	/*for (size_t i = 0; i < F.size(); i++)
-		std::cout << std::setw(10) << F[i];
-	std::cout << std::endl;
-	std::cout << std::endl;*/
-
 	std::vector<std::vector<double>> V_prev;
 	V_prev = V;
 
-	std::vector<double> v(N, 0.0);
+	/*std::vector<double> v(N, 0.0);
 	std::vector<std::vector<double>> A_kudr;
-	A_kudr.assign(N, v);
+	A_kudr.assign(N, v);*/
 
 	std::vector<double> R_N(N);
 
-	for (size_t i = 0; i < A_kudr[0].size(); i++) {
+	/*for (size_t i = 0; i < A_kudr[0].size(); i++) {
 		A_kudr[i][i] = A;
 
 		if (i % (res.V[0].size() - 2) == 0)
@@ -250,7 +240,7 @@ solution_characteristics seidel_method(const std::vector<std::vector<double>>& V
 		}
 	}
 
-	std::vector<double> temp_v;
+	std::vector<double> temp_v;*/
 
 	/*for (size_t i = 0; i < A_kudr[0].size(); i++) {
 		for (size_t j = 0; j < A_kudr[0].size(); j++)
@@ -321,20 +311,53 @@ solution_characteristics seidel_method(const std::vector<std::vector<double>>& V
 	res.N_steps = iter - 1;
 
 	std::cout << std::endl;
-	for (size_t j = 1; j < res.V[0].size() - 1; j++)
+	/*for (size_t j = 1; j < res.V[0].size() - 1; j++)
 		for (size_t i = 1; i < res.V[0].size() - 1; i++) {
 			temp_v.push_back(res.V[j][i]);
-		}
+		}*/
 
 	/*for (size_t i = 0; i < temp_v.size(); i++)
 		std::cout << std::setw(12) << temp_v[i];
 	std::cout << std::endl;*/
 
-	for (size_t i = 0; i < A_kudr[0].size(); i++) {
+	/*for (size_t i = 0; i < A_kudr[0].size(); i++) {
 		for (size_t j = 0; j < A_kudr[0].size(); j++) {
 			R_N[i] += A_kudr[i][j] * temp_v[j];
 		}
+	}*/
+
+
+	for (size_t j = 1; j < res.V[0].size() - 1; j++) {
+		for (size_t i = 1; i < res.V[0].size() - 1; i++) {
+			if (i != 1 && i != res.V[0].size() - 2) {
+				if (j != 1 && j != res.V[0].size() - 2)
+					R_N[(j - 1) * (res.V[0].size() - 2) + (i - 1)] = res.V[j][i + 1] / (h * h) + res.V[j][i - 1] / (h * h) + res.V[j + 1][i] / (k * k) + res.V[j - 1][i] / (k * k) + res.V[j][i] * A;
+				if (j == 1) {
+					R_N[(j - 1) * (res.V[0].size() - 2) + (i - 1)] = res.V[j][i + 1] / (h * h) + res.V[j][i - 1] / (h * h) + res.V[j + 1][i] / (k * k) + res.V[j][i] * A;
+				}
+				if (j == res.V[0].size() - 2) {
+					R_N[(j - 1) * (res.V[0].size() - 2) + (i - 1)] = res.V[j][i + 1] / (h * h) + res.V[j][i - 1] / (h * h) + res.V[j - 1][i] / (k * k) + res.V[j][i] * A;
+				}
+			}
+			if (i == 1) {
+				if (j == 1)
+					R_N[(j - 1) * (res.V[0].size() - 2) + (i - 1)] = res.V[j][i + 1] / (h * h) + res.V[j + 1][i] / (k * k) + res.V[j][i] * A;
+				if (j == res.V[0].size() - 2)
+					R_N[(j - 1) * (res.V[0].size() - 2) + (i - 1)] = res.V[j][i + 1] / (h * h) + res.V[j - 1][i] / (k * k) + res.V[j][i] * A;
+				if (j != 1 && j != res.V[0].size() - 2)
+					R_N[(j - 1) * (res.V[0].size() - 2) + (i - 1)] = res.V[j][i + 1] / (h * h) + res.V[j - 1][i] / (k * k) - res.V[j + 1][i] / (k * k) + res.V[j][i] * A;
+			}
+			if (i == res.V[0].size() - 2) {
+				if (j == 1)
+					R_N[(j - 1) * (res.V[0].size() - 2) + (i - 1)] = res.V[j][i - 1] / (h * h) + res.V[j + 1][i] / (k * k) + res.V[j][i] * A;
+				if (j == res.V[0].size() - 2)
+					R_N[(j - 1) * (res.V[0].size() - 2) + (i - 1)] = res.V[j][i - 1] / (h * h) + res.V[j - 1][i] / (k * k) + res.V[j][i] * A;
+				if (j != 1 && j != res.V[0].size() - 2)
+					R_N[(j - 1) * (res.V[0].size() - 2) + (i - 1)] = res.V[j][i - 1] / (h * h) + res.V[j + 1][i] / (k * k) - res.V[j - 1][i] / (k * k) + res.V[j][i] * A;
+			}
+		}
 	}
+
 
 	/*std::cout << std::endl;
 	for (size_t i = 0; i < R_N.size(); i++)
@@ -394,12 +417,12 @@ int main()
 		for (int j = 0; j < N + 1; j++)
 			U[i][j] = u(a + i * h, c + j * k);
 
-	/*std::cout << "Точное решение задачи в узлах сетки:" << std::endl;
+	std::cout << "Точное решение задачи в узлах сетки:" << std::endl;
 	for (int i = 0; i < N + 1; i++) {
 		for (int j = 0; j < N + 1; j++)
 			std::cout << std::setw(10) << U[i][j];
 		std::cout << std::endl;
-	}*/
+	}
 
 	std::cout << std::endl;
 
